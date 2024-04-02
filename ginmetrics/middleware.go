@@ -143,7 +143,7 @@ func (m *Monitor) ginMetricHandle(ctx *gin.Context, start time.Time) {
 	}
 
 	// set request duration
-	_ = m.GetMetric(metricRequestDuration).Observe([]string{ctx.FullPath()}, r.Method,strconv.Itoa(w.Status()), latency.Seconds())
+	_ = m.GetMetric(metricRequestDuration).Observe([]string{ctx.FullPath(), r.Method, strconv.Itoa(w.Status())}, latency.Seconds())
 
 	// set response size
 	if w.Size() > 0 {

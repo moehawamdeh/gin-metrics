@@ -12,13 +12,13 @@ import (
 )
 
 var (
-	metricRequestTotal    = "gin_request_total"
-	metricRequestUVTotal  = "gin_request_uv_total"
-	metricURIRequestTotal = "gin_uri_request_total"
-	metricRequestBody     = "gin_request_body_total"
-	metricResponseBody    = "gin_response_body_total"
-	metricRequestDuration = "gin_request_duration"
-	metricSlowRequest     = "gin_slow_request_total"
+	metricRequestTotal    = "http_client_request_total"
+	metricRequestUVTotal  = "http_client_request_uv_total"
+	metricURIRequestTotal = "http_client_uri_request_total"
+	metricRequestBody     = "http_client_request_body_total"
+	metricResponseBody    = "http_client_response_body_total"
+	metricRequestDuration = "http_client_requests_seconds"
+	metricSlowRequest     = "http_client_slow_request_total"
 
 	bloomFilter *bloom.BloomFilter
 )
@@ -70,7 +70,7 @@ func (m *Monitor) initGinMetrics() {
 		Type:        Counter,
 		Name:        metricURIRequestTotal,
 		Description: "all the server received request num with every uri.",
-		Labels:      []string{"uri", "method", "code"},
+		Labels:      []string{"uri", "method", "status"},
 	})
 	_ = monitor.AddMetric(&Metric{
 		Type:        Counter,
@@ -88,14 +88,14 @@ func (m *Monitor) initGinMetrics() {
 		Type:        Histogram,
 		Name:        metricRequestDuration,
 		Description: "the time server took to handle the request.",
-		Labels:      []string{"uri"},
+		Labels:      []string{"uri","method", "status"},
 		Buckets:     m.reqDuration,
 	})
 	_ = monitor.AddMetric(&Metric{
 		Type:        Counter,
 		Name:        metricSlowRequest,
 		Description: fmt.Sprintf("the server handled slow requests counter, t=%d.", m.slowTime),
-		Labels:      []string{"uri", "method", "code"},
+		Labels:      []string{"uri", "method", "status"},
 	})
 }
 
@@ -143,7 +143,7 @@ func (m *Monitor) ginMetricHandle(ctx *gin.Context, start time.Time) {
 	}
 
 	// set request duration
-	_ = m.GetMetric(metricRequestDuration).Observe([]string{ctx.FullPath()}, latency.Seconds())
+	_ = m.GetMetric(metricRequestDuration).Observe([]string{ctx.FullPath()}, r.Method,strconv.Itoa(w.Status()), latency.Seconds())
 
 	// set response size
 	if w.Size() > 0 {

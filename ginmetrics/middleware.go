@@ -12,13 +12,13 @@ import (
 )
 
 var (
-	metricRequestTotal    = "http_client_request_total"
-	metricRequestUVTotal  = "http_client_request_uv_total"
-	metricURIRequestTotal = "http_client_uri_request_total"
-	metricRequestBody     = "http_client_request_body_total"
-	metricResponseBody    = "http_client_response_body_total"
-	metricRequestDuration = "http_client_requests_seconds"
-	metricSlowRequest     = "http_client_slow_request_total"
+	metricRequestTotal    = "request_total"
+	metricRequestUVTotal  = "request_uv_total"
+	metricURIRequestTotal = "uri_request_total"
+	metricRequestBody     = "request_body_total"
+	metricResponseBody    = "response_body_total"
+	metricRequestDuration = "requests_seconds"
+	metricSlowRequest     = "slow_request_total"
 
 	bloomFilter *bloom.BloomFilter
 )
@@ -88,7 +88,7 @@ func (m *Monitor) initGinMetrics() {
 		Type:        Histogram,
 		Name:        metricRequestDuration,
 		Description: "the time server took to handle the request.",
-		Labels:      []string{"uri","method", "status"},
+		Labels:      []string{"uri", "method", "status"},
 		Buckets:     m.reqDuration,
 	})
 	_ = monitor.AddMetric(&Metric{
